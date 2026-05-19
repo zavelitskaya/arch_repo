@@ -35,7 +35,7 @@
                 <select name="system" style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; background: white;">
                     <option value="">Все системы</option>
                     {% for system in systems %}
-                        <option value="{{ system.id }}" {% if current_system == system.id|stringformat:"s" %}selected{% endif %}>{{ system.name }}</option>
+                        <option value="{{ system.id }}" {% if current_system|stringformat:'s' == system.id|stringformat:'s' %}selected{% endif %}>{{ system.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -52,24 +52,41 @@
     <!-- Список интеграций -->
     <div style="display: flex; flex-direction: column; gap: 1rem;">
         {% for interaction in interactions %}
-        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; transition: all 0.15s;">
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div style="flex: 1;">
                     <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
-                        <strong style="font-size: 1rem;">{{ interaction.name }}</strong>
-                        <span class="env-badge env-{{ interaction.environment }}">{{ interaction.get_environment_display }}</span>
-                        <span class="protocol-badge">{{ interaction.protocol|upper }}</span>
+                        <strong style="font-size: 1rem;">{{ interaction.service.name }}</strong>
+                        <span class="env-badge env-{{ interaction.environment }}">
+                            {% if interaction.environment == 'dev' %}Разработка
+                            {% elif interaction.environment == 'stage' %}Стейджинг
+                            {% elif interaction.environment == 'prod' %}Продакшн
+                            {% else %}{{ interaction.environment }}{% endif %}
+                        </span>
+                        <span class="status-badge status-{{ interaction.status }}">
+                            {% if interaction.status == 'active' %}Активен
+                            {% elif interaction.status == 'testing' %}Тестируется
+                            {% elif interaction.status == 'planned' %}Планируется
+                            {% elif interaction.status == 'deprecated' %}Устаревший
+                            {% else %}{{ interaction.status }}{% endif %}
+                        </span>
                     </div>
                     
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.875rem;">
-                        <span style="color: #475569;">{{ interaction.source_component.system.name }}</span>
+                        <span style="font-weight: 500;">{{ interaction.source_system.name }}</span>
                         <span style="color: #3b82f6;">→</span>
-                        <span style="color: #475569;">{{ interaction.target_component.system.name }}</span>
-                        <span style="color: #64748b; font-size: 0.75rem;">({{ interaction.source_component.name }} → {{ interaction.target_component.name }})</span>
+                        <span style="font-weight: 500;">{{ interaction.target_system.name }}</span>
                     </div>
                     
-                    {% if interaction.technical_description %}
-                        <p style="color: #64748b; font-size: 0.813rem; margin: 0.5rem 0 0 0;">{{ interaction.technical_description|truncatewords:20 }}</p>
+                    <div style="font-size: 0.75rem; color: #64748b;">
+                        <span class="protocol-badge">{{ interaction.service.protocol|upper }}</span>
+                        {% if interaction.service.endpoint %}
+                            <span style="margin-left: 0.5rem;">{{ interaction.service.endpoint }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if interaction.description %}
+                        <p style="color: #64748b; font-size: 0.813rem; margin: 0.5rem 0 0 0;">{{ interaction.description|truncatewords:20 }}</p>
                     {% endif %}
                 </div>
                 <a href="{% url 'interaction_detail' interaction.id %}" class="link">Подробнее →</a>
@@ -80,7 +97,7 @@
             {% if search_query or current_env or current_system %}
                 Ничего не найдено по вашему запросу
             {% else %}
-                Нет интеграций. Создайте первую интеграцию через админку.
+                Нет интеграций. Создайте первую интеграцию через кнопку выше.
             {% endif %}
         </div>
         {% endfor %}
@@ -144,6 +161,29 @@
     .env-prod {
         background: #dcfce7;
         color: #15803d;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 0.125rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.688rem;
+        font-weight: 500;
+    }
+    .status-active {
+        background: #dcfce7;
+        color: #15803d;
+    }
+    .status-testing {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    .status-planned {
+        background: #e2e8f0;
+        color: #475569;
+    }
+    .status-deprecated {
+        background: #fee2e2;
+        color: #dc2626;
     }
     .protocol-badge {
         display: inline-block;

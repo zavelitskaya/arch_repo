@@ -9,62 +9,49 @@
     </div>
     
     <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
-        <form method="post">
+        <form method="post" id="integration-form">
             {% csrf_token %}
-            
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.name.label }}</label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                    <p style="color: #dc2626; font-size: 0.75rem;">{{ form.name.errors.0 }}</p>
-                {% endif %}
-            </div>
             
             <div style="margin-bottom: 1rem;">
                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.service.label }}</label>
                 {{ form.service }}
-                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Необязательно. Связь с бизнес-смыслом интеграции.</p>
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Выберите интеграционный сервис (контракт) или создайте новый в админке</p>
+                {% if form.service.errors %}
+                    <p style="color: #dc2626; font-size: 0.75rem;">{{ form.service.errors.0 }}</p>
+                {% endif %}
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                 <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.source_component.label }}</label>
-                    {{ form.source_component }}
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.source_system.label }}</label>
+                    {{ form.source_system }}
+                    {% if form.source_system.errors %}
+                        <p style="color: #dc2626; font-size: 0.75rem;">{{ form.source_system.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.target_component.label }}</label>
-                    {{ form.target_component }}
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.target_system.label }}</label>
+                    {{ form.target_system }}
+                    {% if form.target_system.errors %}
+                        <p style="color: #dc2626; font-size: 0.75rem;">{{ form.target_system.errors.0 }}</p>
+                    {% endif %}
                 </div>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                 <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.protocol.label }}</label>
-                    {{ form.protocol }}
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.environment.label }}</label>
+                    {{ form.environment }}
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.method_type.label }}</label>
-                    {{ form.method_type }}
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.status.label }}</label>
+                    {{ form.status }}
                 </div>
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.method_detail.label }}</label>
-                    {{ form.method_detail }}
-                </div>
-            </div>
-            
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.endpoint.label }}</label>
-                {{ form.endpoint }}
             </div>
             
             <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.environment.label }}</label>
-                {{ form.environment }}
-            </div>
-            
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.technical_description.label }}</label>
-                {{ form.technical_description }}
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.description.label }}</label>
+                {{ form.description }}
             </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
@@ -112,6 +99,7 @@
         border-radius: 8px;
         font-size: 0.875rem;
         box-sizing: border-box;
+        background: white;
     }
     .form-control:focus {
         outline: none;
@@ -121,9 +109,21 @@
     textarea.form-control {
         resize: vertical;
     }
-    select.form-control {
-        background: white;
-        cursor: pointer;
-    }
 </style>
+
+<script>
+    // Дополнительная валидация: source и target не могут быть одинаковыми
+    const form = document.getElementById('integration-form');
+    const sourceSelect = document.getElementById('id_source_system');
+    const targetSelect = document.getElementById('id_target_system');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (sourceSelect && targetSelect && sourceSelect.value === targetSelect.value && sourceSelect.value !== '') {
+                e.preventDefault();
+                alert('Система-поставщик и система-потребитель не могут быть одинаковыми');
+            }
+        });
+    }
+</script>
 {% endblock %}

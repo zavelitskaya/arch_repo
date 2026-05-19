@@ -1,0 +1,126 @@
+{% extends 'repository/base.html' %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1>Интеграционные сервисы</h1>
+        <a href="{% url 'service_create' %}" class="btn-primary">+ Добавить сервис</a>
+    </div>
+    
+    <!-- Поиск -->
+    <div style="margin-bottom: 1.5rem;">
+        <form method="get" style="display: flex; gap: 1rem;">
+            <input type="text" 
+                   name="search" 
+                   value="{{ search_query }}" 
+                   placeholder="Поиск по названию..." 
+                   style="flex: 1; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem;">
+            <button type="submit" class="btn-primary">Найти</button>
+            {% if search_query %}
+                <a href="{% url 'service_list' %}" class="btn">Сбросить</a>
+            {% endif %}
+        </form>
+    </div>
+    
+    <!-- Список сервисов -->
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for service in services %}
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                        <strong style="font-size: 1rem;">{{ service.name }}</strong>
+                        <span class="version-badge">v{{ service.version }}</span>
+                        <span class="protocol-badge">{{ service.get_protocol_display }}</span>
+                        <span class="pattern-badge">{{ service.get_pattern_display }}</span>
+                        {% if service.is_deprecated %}
+                            <span class="deprecated-badge">Устаревший</span>
+                        {% endif %}
+                    </div>
+                    
+                    <p style="color: #64748b; font-size: 0.813rem; margin: 0.5rem 0;">{{ service.business_purpose|truncatewords:30 }}</p>
+                    
+                    <div style="font-size: 0.75rem; color: #64748b;">
+                        Владелец: {{ service.owner_system.name|default:"—" }}
+                        {% if service.endpoint %}
+                            <span style="margin-left: 1rem;">Endpoint: {{ service.endpoint }}</span>
+                        {% elif service.topic %}
+                            <span style="margin-left: 1rem;">Topic: {{ service.topic }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'service_detail' service.id %}" class="link">Подробнее →</a>
+            </div>
+        </div>
+        {% empty %}
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 3rem; text-align: center; color: #64748b;">
+            {% if search_query %}
+                Ничего не найдено по запросу "{{ search_query }}"
+            {% else %}
+                Нет интеграционных сервисов. Создайте первый сервис через кнопку выше.
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #475569;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .link {
+        color: #3b82f6;
+        text-decoration: none;
+        font-size: 0.813rem;
+    }
+    .version-badge, .protocol-badge, .pattern-badge {
+        display: inline-block;
+        padding: 0.125rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.688rem;
+        font-weight: 500;
+    }
+    .version-badge {
+        background: #e2e8f0;
+        color: #475569;
+    }
+    .protocol-badge {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+    .pattern-badge {
+        background: #f1f5f9;
+        color: #475569;
+    }
+    .deprecated-badge {
+        display: inline-block;
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 0.125rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.688rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,302 @@
+{% extends 'repository/base.html' %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1>{% if form.instance.pk %}Редактирование сервиса{% else %}Новый интеграционный сервис{% endif %}</h1>
+        <a href="{% url 'service_list' %}" class="btn">← Назад</a>
+    </div>
+    
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+        <form method="post" id="service-form">
+            {% csrf_token %}
+            
+            <!-- Основные поля (всегда видны) -->
+            <div id="field-name" class="field-group" style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Название сервиса</label>
+                {{ form.name }}
+            </div>
+            
+            <div id="field-business_purpose" class="field-group" style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Бизнес-смысл</label>
+                {{ form.business_purpose }}
+            </div>
+            
+            <div id="field-owner_system" class="field-group" style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Владелец сервиса</label>
+                {{ form.owner_system }}
+                <p style="font-size: 0.75rem; color: #64748b;">Система, которая определяет контракт</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div id="field-protocol" class="field-group">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Протокол</label>
+                    {{ form.protocol }}
+                </div>
+                <div id="field-pattern" class="field-group">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Паттерн</label>
+                    {{ form.pattern }}
+                </div>
+            </div>
+            
+            <!-- HTTP поля -->
+            <div id="field-endpoint" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Endpoint</label>
+                {{ form.endpoint }}
+            </div>
+            
+            <!-- Kafka / MQ общие -->
+            <div id="field-cluster" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Кластер</label>
+                {{ form.cluster }}
+            </div>
+            
+            <!-- Kafka Event -->
+            <div id="field-topic" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Топик</label>
+                {{ form.topic }}
+            </div>
+            
+            <!-- Kafka Request-Response -->
+            <div id="field-request_topic" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Request topic</label>
+                {{ form.request_topic }}
+            </div>
+            <div id="field-response_topic" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Response topic</label>
+                {{ form.response_topic }}
+            </div>
+            
+            <!-- MQ Event -->
+            <div id="field-queue" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Очередь</label>
+                {{ form.queue }}
+            </div>
+            <div id="field-exchange" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Exchange</label>
+                {{ form.exchange }}
+            </div>
+            <div id="field-routing_key" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Routing key</label>
+                {{ form.routing_key }}
+            </div>
+            
+            <!-- MQ Request-Response -->
+            <div id="field-request_queue" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Request queue</label>
+                {{ form.request_queue }}
+            </div>
+            <div id="field-response_queue" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Response queue</label>
+                {{ form.response_queue }}
+            </div>
+            
+            <!-- JDBC -->
+            <div id="field-connection_string" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Connection string</label>
+                {{ form.connection_string }}
+            </div>
+            <div id="field-query" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">SQL запрос</label>
+                {{ form.query }}
+            </div>
+            
+            <!-- gRPC -->
+            <div id="field-proto_service" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Proto service</label>
+                {{ form.proto_service }}
+            </div>
+            <div id="field-proto_method" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Proto method</label>
+                {{ form.proto_method }}
+            </div>
+            <div id="field-proto_schema_url" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Proto schema URL</label>
+                {{ form.proto_schema_url }}
+            </div>
+            
+            <!-- SFTP -->
+            <div id="field-host" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Хост</label>
+                {{ form.host }}
+            </div>
+            <div id="field-port" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Порт</label>
+                {{ form.port }}
+            </div>
+            <div id="field-file_path" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Путь к файлу</label>
+                {{ form.file_path }}
+            </div>
+            <div id="field-file_mask" class="field-group protocol-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Маска файла</label>
+                {{ form.file_mask }}
+            </div>
+            
+            <!-- Схемы -->
+            <div id="field-request_schema" class="field-group schema-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Схема запроса (JSON Schema)</label>
+                {{ form.request_schema }}
+            </div>
+            <div id="field-response_schema" class="field-group schema-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Схема ответа (JSON Schema)</label>
+                {{ form.response_schema }}
+            </div>
+            <div id="field-message_schema" class="field-group schema-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Схема сообщения (JSON Schema)</label>
+                {{ form.message_schema }}
+            </div>
+            <div id="field-request_schema_url" class="field-group schema-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Ссылка на схему запроса</label>
+                {{ form.request_schema_url }}
+            </div>
+            <div id="field-response_schema_url" class="field-group schema-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Ссылка на схему ответа</label>
+                {{ form.response_schema_url }}
+            </div>
+            <div id="field-message_schema_url" class="field-group schema-fields" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Ссылка на схему сообщения</label>
+                {{ form.message_schema_url }}
+            </div>
+            
+            <!-- Версия -->
+            <div id="field-version" class="field-group" style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Версия</label>
+                {{ form.version }}
+            </div>
+            
+            <div id="field-is_deprecated" class="field-group" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                {{ form.is_deprecated }}
+                <label style="margin-bottom: 0;">{{ form.is_deprecated.label }}</label>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn-primary">Сохранить</button>
+                <a href="{% url 'service_list' %}" class="btn">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #475569;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        box-sizing: border-box;
+    }
+    textarea.form-control {
+        resize: vertical;
+        font-family: monospace;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    .checkbox-control {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+    }
+    select.form-control {
+        background: white;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    // Получаем элементы
+    const protocolSelect = document.getElementById('id_protocol');
+    const patternSelect = document.getElementById('id_pattern');
+    const allFieldGroups = document.querySelectorAll('.field-group');
+    
+    // Функция скрытия всех полей
+    function hideAllFields() {
+        allFieldGroups.forEach(group => {
+            group.style.display = 'none';
+        });
+    }
+    
+    // Функция показа нужных полей
+    function showFields(fields) {
+        fields.forEach(fieldId => {
+            const element = document.getElementById(fieldId);
+            if (element) element.style.display = 'block';
+        });
+    }
+    
+    // Основная логика
+    function toggleFields() {
+        hideAllFields();
+        
+        const protocol = protocolSelect.value;
+        const pattern = patternSelect.value;
+        
+        // Всегда показываем основные поля
+        showFields(['field-name', 'field-business_purpose', 'field-owner_system', 'field-protocol', 'field-pattern', 'field-version', 'field-is_deprecated']);
+        
+        if (protocol === 'http') {
+            showFields(['field-endpoint', 'field-request_schema', 'field-response_schema', 'field-request_schema_url', 'field-response_schema_url']);
+        }
+        else if (protocol === 'kafka') {
+            showFields(['field-cluster']);
+            if (pattern === 'reqresp') {
+                showFields(['field-request_topic', 'field-response_topic', 'field-request_schema', 'field-response_schema', 'field-request_schema_url', 'field-response_schema_url']);
+            } else if (pattern === 'event') {
+                showFields(['field-topic', 'field-message_schema', 'field-message_schema_url']);
+            }
+        }
+        else if (protocol === 'mq') {
+            showFields(['field-cluster']);
+            if (pattern === 'reqresp') {
+                showFields(['field-request_queue', 'field-response_queue', 'field-exchange', 'field-routing_key', 'field-request_schema', 'field-response_schema', 'field-request_schema_url', 'field-response_schema_url']);
+            } else if (pattern === 'event') {
+                showFields(['field-queue', 'field-exchange', 'field-routing_key', 'field-message_schema', 'field-message_schema_url']);
+            }
+        }
+        else if (protocol === 'jdbc') {
+            showFields(['field-connection_string', 'field-query', 'field-request_schema', 'field-response_schema']);
+        }
+        else if (protocol === 'grpc') {
+            showFields(['field-endpoint', 'field-proto_service', 'field-proto_method', 'field-proto_schema_url', 'field-request_schema', 'field-response_schema', 'field-request_schema_url', 'field-response_schema_url']);
+        }
+        else if (protocol === 'sftp') {
+            showFields(['field-host', 'field-port', 'field-file_path', 'field-file_mask']);
+        }
+    }
+    
+    // Слушатели событий
+    protocolSelect.addEventListener('change', toggleFields);
+    patternSelect.addEventListener('change', toggleFields);
+    
+    // Вызываем при загрузке страницы
+    toggleFields();
+</script>
+{% endblock %}

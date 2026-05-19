@@ -1,0 +1,251 @@
+{% extends 'repository/base.html' %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    
+    <div style="margin-bottom: 1.5rem;">
+        <a href="{% url 'service_list' %}" class="btn">← Назад к сервисам</a>
+    </div>
+    
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h1 style="margin: 0;">{{ service.name }}</h1>
+            <div>
+                <span class="version-badge">v{{ service.version }}</span>
+                {% if service.is_deprecated %}
+                    <span class="deprecated-badge">Устаревший</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <h3>Бизнес-смысл</h3>
+            <p>{{ service.business_purpose|default:"—" }}</p>
+        </div>
+        
+        <div class="detail-section">
+            <h3>Владелец</h3>
+            <p>{{ service.owner_system.name|default:"—" }}</p>
+        </div>
+        
+        <div class="detail-section">
+            <h3>Технические параметры</h3>
+            <div class="detail-row">
+                <div class="detail-label">Протокол:</div>
+                <div class="detail-value">{{ service.get_protocol_display }}</div>
+            </div>
+            
+            {% if service.protocol == 'http' %}
+                <div class="detail-row">
+                    <div class="detail-label">Endpoint:</div>
+                    <div class="detail-value"><code>{{ service.endpoint|default:"—" }}</code></div>
+                </div>
+                
+            {% elif service.protocol == 'http_async' %}
+                <div class="detail-row">
+                    <div class="detail-label">Endpoint:</div>
+                    <div class="detail-value"><code>{{ service.endpoint|default:"—" }}</code></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Callback URL:</div>
+                    <div class="detail-value"><code>{{ service.callback_endpoint|default:"—" }}</code></div>
+                </div>
+                
+            {% elif service.protocol == 'kafka_event' %}
+                <div class="detail-row">
+                    <div class="detail-label">Топик:</div>
+                    <div class="detail-value"><code>{{ service.request_topic|default:"—" }}</code></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Kafka кластер:</div>
+                    <div class="detail-value">{{ service.kafka_cluster|default:"—" }}</div>
+                </div>
+                
+            {% elif service.protocol == 'kafka_reqresp' %}
+                <div class="detail-row">
+                    <div class="detail-label">Request topic:</div>
+                    <div class="detail-value"><code>{{ service.request_topic|default:"—" }}</code></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Response topic:</div>
+                    <div class="detail-value"><code>{{ service.response_topic|default:"—" }}</code></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Kafka кластер:</div>
+                    <div class="detail-value">{{ service.kafka_cluster|default:"—" }}</div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="detail-section">
+            <h3>Схемы данных</h3>
+            {% if service.protocol == 'kafka_event' %}
+                <div class="detail-row">
+                    <div class="detail-label">Схема события:</div>
+                    <div class="detail-value">
+                        {% if service.request_schema %}
+                            <pre style="background: #f8fafc; padding: 0.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.688rem;">{{ service.request_schema|pprint }}</pre>
+                        {% else %}—{% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="detail-row">
+                    <div class="detail-label">Схема запроса:</div>
+                    <div class="detail-value">
+                        {% if service.request_schema %}
+                            <pre style="background: #f8fafc; padding: 0.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.688rem;">{{ service.request_schema|pprint }}</pre>
+                        {% else %}—{% endif %}
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Схема ответа:</div>
+                    <div class="detail-value">
+                        {% if service.response_schema %}
+                            <pre style="background: #f8fafc; padding: 0.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.688rem;">{{ service.response_schema|pprint }}</pre>
+                        {% else %}—{% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if service.schema_url %}
+            <div class="detail-row">
+                <div class="detail-label">Ссылка на схему:</div>
+                <div class="detail-value"><a href="{{ service.schema_url }}" target="_blank">{{ service.schema_url }}</a></div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Потоки, использующие этот сервис -->
+        <div class="detail-section">
+            <h3>Используется в потоках</h3>
+            {% with flows=service.flows.all %}
+                {% if flows %}
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        {% for flow in flows %}
+                            <div style="background: #f8fafc; border-radius: 8px; padding: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>{{ flow.source_system.name }}</strong>
+                                        <span style="color: #3b82f6;"> → </span>
+                                        <strong>{{ flow.target_system.name }}</strong>
+                                        <span class="env-badge env-{{ flow.environment }}" style="margin-left: 0.5rem;">
+                                            {% if flow.environment == 'dev' %}Разработка
+                                            {% elif flow.environment == 'stage' %}Стейджинг
+                                            {% else %}Продакшн{% endif %}
+                                        </span>
+                                    </div>
+                                    <a href="{% url 'interaction_detail' flow.id %}" class="link">→</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: #64748b;">Нет потоков, использующих этот сервис</p>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+    
+    <div style="margin-top: 1rem;">
+        <a href="{% url 'service_edit' service.id %}" class="btn">✏️ Редактировать</a>
+    </div>
+</div>
+
+<style>
+    .btn {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #475569;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .detail-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    .detail-section:first-of-type {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+    .detail-section h3 {
+        font-size: 1rem;
+        margin: 0 0 1rem 0;
+        color: #0f172a;
+    }
+    .detail-row {
+        display: flex;
+        padding: 0.5rem 0;
+    }
+    .detail-label {
+        width: 140px;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #64748b;
+    }
+    .detail-value {
+        flex: 1;
+        font-size: 0.875rem;
+        color: #1e293b;
+    }
+    .version-badge {
+        display: inline-block;
+        background: #e2e8f0;
+        color: #475569;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.688rem;
+        font-weight: 500;
+    }
+    .deprecated-badge {
+        display: inline-block;
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.688rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+    }
+    .env-badge {
+        display: inline-block;
+        padding: 0.125rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.688rem;
+        font-weight: 500;
+    }
+    .env-dev {
+        background: #e2e8f0;
+        color: #475569;
+    }
+    .env-stage {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    .env-prod {
+        background: #dcfce7;
+        color: #15803d;
+    }
+    .link {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+    pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    code {
+        background: #f1f5f9;
+        padding: 0.125rem 0.375rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+</style>
+{% endblock %}

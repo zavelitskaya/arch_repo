@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import BusinessProcess, Scenario, ScenarioStep, IntegrationInteraction
+from .models import BusinessProcess, Scenario, ScenarioStep, IntegrationService, IntegrationFlow
 
 
 class RegisterForm(UserCreationForm):
@@ -77,11 +77,11 @@ class ScenarioForm(forms.ModelForm):
 class ScenarioStepForm(forms.ModelForm):
     class Meta:
         model = ScenarioStep
-        fields = ['step_order', 'step_type', 'interaction', 'condition_expression', 'true_next_step', 'false_next_step']
+        fields = ['step_order', 'step_type', 'flow', 'condition_expression', 'true_next_step', 'false_next_step']
         widgets = {
             'step_order': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
             'step_type': forms.Select(attrs={'class': 'form-control', 'id': 'step-type'}),
-            'interaction': forms.Select(attrs={'class': 'form-control', 'id': 'interaction-field'}),
+            'flow': forms.Select(attrs={'class': 'form-control', 'id': 'flow-field'}),
             'condition_expression': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'например: сумма > 10000'}),
             'true_next_step': forms.Select(attrs={'class': 'form-control', 'id': 'true-next-field'}),
             'false_next_step': forms.Select(attrs={'class': 'form-control', 'id': 'false-next-field'}),
@@ -89,7 +89,7 @@ class ScenarioStepForm(forms.ModelForm):
         labels = {
             'step_order': 'Порядковый номер',
             'step_type': 'Тип шага',
-            'interaction': 'Интеграционное взаимодействие',
+            'flow': 'Интеграционный поток',
             'condition_expression': 'Условие',
             'true_next_step': 'Переход при ИСТИНА',
             'false_next_step': 'Переход при ЛОЖЬ',
@@ -106,54 +106,67 @@ class ScenarioStepForm(forms.ModelForm):
             self.fields['true_next_step'].required = False
             self.fields['false_next_step'].required = False
             
-            systems = set()
-            for step in existing_steps:
-                if step.interaction:
-                    systems.add(step.interaction.source_component.system)
-                    systems.add(step.interaction.target_component.system)
-            
-            if systems:
-                self.fields['interaction'].queryset = IntegrationInteraction.objects.filter(
-                    source_component__system__in=systems
-                ) | IntegrationInteraction.objects.filter(
-                    target_component__system__in=systems
-                )
-            else:
-                self.fields['interaction'].queryset = IntegrationInteraction.objects.all()
+            # Все доступные потоки
+            self.fields['flow'].queryset = IntegrationFlow.objects.all()
+            self.fields['flow'].required = False
 
 
-class IntegrationInteractionForm(forms.ModelForm):
+class IntegrationServiceForm(forms.ModelForm):
     class Meta:
-        model = IntegrationInteraction
-        fields = ['name', 'service', 'source_component', 'target_component', 'protocol', 'method_type', 'method_detail', 'endpoint', 'environment', 'technical_description']
+        model = IntegrationService
+        fields = '__all__'
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Например: API вызов платежей'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'business_purpose': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'owner_system': forms.Select(attrs={'class': 'form-control'}),
+            'protocol': forms.Select(attrs={'class': 'form-control', 'id': 'id_protocol'}),
+            'pattern': forms.Select(attrs={'class': 'form-control', 'id': 'id_pattern'}),
+            'endpoint': forms.TextInput(attrs={'class': 'form-control'}),
+            'topic': forms.TextInput(attrs={'class': 'form-control'}),
+            'request_topic': forms.TextInput(attrs={'class': 'form-control'}),
+            'response_topic': forms.TextInput(attrs={'class': 'form-control'}),
+            'queue': forms.TextInput(attrs={'class': 'form-control'}),
+            'request_queue': forms.TextInput(attrs={'class': 'form-control'}),
+            'response_queue': forms.TextInput(attrs={'class': 'form-control'}),
+            'exchange': forms.TextInput(attrs={'class': 'form-control'}),
+            'routing_key': forms.TextInput(attrs={'class': 'form-control'}),
+            'cluster': forms.TextInput(attrs={'class': 'form-control'}),
+            'connection_string': forms.TextInput(attrs={'class': 'form-control'}),
+            'query': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'proto_service': forms.TextInput(attrs={'class': 'form-control'}),
+            'proto_method': forms.TextInput(attrs={'class': 'form-control'}),
+            'proto_schema_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'host': forms.TextInput(attrs={'class': 'form-control'}),
+            'port': forms.NumberInput(attrs={'class': 'form-control'}),
+            'file_path': forms.TextInput(attrs={'class': 'form-control'}),
+            'file_mask': forms.TextInput(attrs={'class': 'form-control'}),
+            'request_schema': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'response_schema': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'message_schema': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'request_schema_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'response_schema_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'message_schema_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'version': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_deprecated': forms.CheckboxInput(attrs={'class': 'checkbox-control'}),
+        }
+
+class IntegrationFlowForm(forms.ModelForm):
+    class Meta:
+        model = IntegrationFlow
+        fields = ['service', 'source_system', 'target_system', 'environment', 'status', 'description']
+        widgets = {
             'service': forms.Select(attrs={'class': 'form-control'}),
-            'source_component': forms.Select(attrs={'class': 'form-control', 'id': 'source-component'}),
-            'target_component': forms.Select(attrs={'class': 'form-control', 'id': 'target-component'}),
-            'protocol': forms.Select(attrs={'class': 'form-control'}),
-            'method_type': forms.Select(attrs={'class': 'form-control'}),
-            'method_detail': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'GET, POST, SUBSCRIBE...'}),
-            'endpoint': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '/api/v1/payments'}),
+            'source_system': forms.Select(attrs={'class': 'form-control'}),
+            'target_system': forms.Select(attrs={'class': 'form-control'}),
             'environment': forms.Select(attrs={'class': 'form-control'}),
-            'technical_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Техническое описание...'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Дополнительная информация...'}),
         }
         labels = {
-            'name': 'Название интеграции',
-            'service': 'Интеграционный сервис (бизнес-смысл)',
-            'source_component': 'Компонент-источник',
-            'target_component': 'Компонент-приёмник',
-            'protocol': 'Протокол',
-            'method_type': 'Тип метода',
-            'method_detail': 'Детали метода',
-            'endpoint': 'Endpoint',
+            'service': 'Интеграционный сервис',
+            'source_system': 'Система-поставщик',
+            'target_system': 'Система-потребитель',
             'environment': 'Среда',
-            'technical_description': 'Техническое описание',
+            'status': 'Статус',
+            'description': 'Описание',
         }
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['service'].required = False
-        self.fields['method_detail'].required = False
-        self.fields['endpoint'].required = False
-        self.fields['technical_description'].required = False
