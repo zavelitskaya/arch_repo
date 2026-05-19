@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ArchRepo · Архитектурный репозиторий{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+<div class="header">
+    <div class="header-inner">
+        <a href="/" class="logo">arch<span>repo</span></a>
+        <nav>
+            <a href="/processes/">Процессы</a>
+            <a href="/systems/">Системы</a>
+            <a href="{% url 'interaction_list' %}">Интеграции</a>
+            <a href="/admin/">Админка</a>
+            <a href="/api/">API</a>
+            <div class="user-menu">
+                {% if user.is_authenticated %}
+                    <div class="user-dropdown">
+                        <button class="user-btn">
+                            <i class="fas fa-user-circle"></i>
+                            <span>{{ user.username }}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="login-link">Войти</a>
+                    <a href="{% url 'register' %}" class="register-link">Регистрация</a>
+                {% endif %}
+            </div>
+        </nav>
+    </div>
+</div>
+    <div class="container">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+
+</html>

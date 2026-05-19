@@ -1,0 +1,110 @@
+{% extends 'repository/base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h1>Бизнес-процессы</h1>
+    <a href="{% url 'process_create' %}" class="btn">+ Добавить процесс</a>
+</div>
+
+<!-- ФОРМА ПОИСКА -->
+<div style="margin-bottom: 1.5rem;">
+    <form method="get" style="display: flex; gap: 0.75rem;">
+        <input type="text" 
+               name="search" 
+               value="{{ search_query }}" 
+               placeholder="Поиск по коду или названию" 
+               style="flex: 1; padding: 0.625rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; outline: none; transition: all 0.15s;">
+        <button type="submit" style="background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 0.625rem 1.5rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background 0.15s;">Найти</button>
+        {% if search_query %}
+            <a href="{% url 'process_list' %}" style="background: white; color: #475569; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.625rem 1.5rem; font-size: 0.875rem; font-weight: 500; text-decoration: none; transition: all 0.15s;">Сбросить</a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr><th>Код</th><th>Название</th><th>Владелец</th><th>Дата создания</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for p in processes %}
+                <tr>
+                    <td><span class="badge">{{ p.code }}</span></td>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.business_owner|default:"—" }}</td>
+                    <td>{{ p.created_at|date:"d.m.Y" }}</td>
+                    <td><a href="/processes/{{ p.id }}/" style="color: #3b82f6; text-decoration: none; font-weight: 500;">Детали →</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: #64748b;">
+                        {% if search_query %}
+                            Ничего не найдено по запросу "{{ search_query }}"
+                        {% else %}
+                            Нет бизнес-процессов
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    button:hover {
+        background: #2563eb !important;
+    }
+    .btn {
+        display: inline-block;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #475569;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+    .btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+    .badge {
+        display: inline-block;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.125rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.688rem;
+        font-weight: 500;
+    }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .data-table th {
+        text-align: left;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        font-weight: 600;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .data-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доступ ограничен · ArchRepo</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .access-container {
+            min-height: calc(100vh - 64px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+        }
+        .access-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .access-card i {
+            font-size: 4rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+        .access-card h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .access-card p {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+        .access-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .btn-outline {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #475569;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="access-container">
+        <div class="access-card">
+            <i class="fas fa-lock"></i>
+            <h1>Доступ ограничен</h1>
+            <p>Только авторизованные пользователи могут просматривать архитектурный репозиторий</p>
+            <div class="access-buttons">
+                <a href="{% url 'login' %}" class="btn-primary">Войти</a>
+                <a href="{% url 'register' %}" class="btn-outline">Регистрация</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

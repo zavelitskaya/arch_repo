@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: arch_repo_db
+    environment:
+      POSTGRES_DB: arch_repo
+      POSTGRES_USER: arch_user
+      POSTGRES_PASSWORD: arch_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

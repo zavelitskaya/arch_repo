@@ -1,0 +1,114 @@
+{% extends 'repository/base.html' %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+
+    <!-- Кнопка назад -->
+    <div style="margin-bottom: 1.5rem;">
+        <a href="/processes/"
+            style="display: inline-flex; align-items: center; gap: 0.5rem; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.813rem; font-weight: 500; color: #475569; text-decoration: none;">
+            ← Назад к списку процессов
+        </a>
+    </div>
+
+    <!-- Карточка бизнес-процесса -->
+    <div
+        style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div>
+                <span
+                    style="display: inline-block; background: #eff6ff; color: #3b82f6; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.688rem; font-weight: 500; margin-bottom: 0.5rem;">
+                    {{ process.code }}
+                </span>
+                <h2 style="margin: 0.5rem 0 0 0;">{{ process.name }}</h2>
+            </div>
+            <a href="{% url 'process_edit' process.id %}"
+                style="color: #64748b; text-decoration: none; font-size: 0.875rem;">
+                ✏️ Редактировать
+            </a>
+        </div>
+
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+            <div style="margin-bottom: 0.75rem;">
+                <span style="width: 120px; display: inline-block; color: #64748b; font-size: 0.813rem;">Описание:</span>
+                <span style="color: #1e293b; font-size: 0.875rem;">{{ process.description|default:"—" }}</span>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+                <span
+                    style="width: 120px; display: inline-block; color: #64748b; font-size: 0.813rem;">Бизнес-владелец:</span>
+                <span style="color: #1e293b; font-size: 0.875rem;">{{ process.business_owner|default:"—" }}</span>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+                <span style="width: 120px; display: inline-block; color: #64748b; font-size: 0.813rem;">Дата
+                    создания:</span>
+                <span style="color: #1e293b; font-size: 0.875rem;">{{ process.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            <div>
+                <span style="width: 120px; display: inline-block; color: #64748b; font-size: 0.813rem;">Последнее
+                    обновление:</span>
+                <span style="color: #1e293b; font-size: 0.875rem;">{{ process.updated_at|date:"d.m.Y H:i" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сценарии -->
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0;">Сценарии</h3>
+            <a href="/admin/repository/scenario/add/?business_process={{ process.id }}"
+                style="background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 0.375rem 0.875rem; font-size: 0.75rem; text-decoration: none;">+
+                Добавить сценарий</a>
+        </div>
+
+        {% if process.scenarios.all %}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for scenario in process.scenarios.all %}
+            <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; transition: all 0.15s;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 1rem;">{{ scenario.name }}</strong>
+                        {% if scenario.is_default %}
+                        <span
+                            style="background: #e2e8f0; color: #475569; padding: 0.125rem 0.5rem; border-radius: 20px; font-size: 0.688rem; margin-left: 0.5rem;">Основной</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'scenario_detail' scenario.id %}"
+                        style="color: #3b82f6; text-decoration: none; font-size: 0.813rem;">Подробнее →</a>
+                </div>
+                {% if scenario.description %}
+                <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 0.813rem;">{{ scenario.description }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; color: #64748b;">
+            Нет сценариев
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Прикреплённые файлы -->
+    {% if process.documents.all %}
+    <div
+        style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem;">
+        <h3 style="margin: 0 0 1rem 0;">Прикреплённые файлы</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            {% for doc in process.documents.all %}
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: #f8fafc; border-radius: 8px;">
+                <div>
+                    <span style="font-size: 0.875rem;">📎 {{ doc.file.name|slice:"50:" }}</span>
+                    <span style="font-size: 0.688rem; color: #64748b; margin-left: 0.5rem;">загружено: {{
+                        doc.uploaded_at|date:"d.m.Y" }}</span>
+                </div>
+                <a href="{{ doc.file.url }}" target="_blank"
+                    style="color: #3b82f6; text-decoration: none; font-size: 0.75rem;">Скачать</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends 'repository/base.html' %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1>{% if form.instance.pk %}Редактирование{% else %}Новый бизнес-процесс{% endif %}</h1>
+        <a href="{% url 'process_list' %}" class="btn">← Назад</a>
+    </div>
+    
+    <div class="card">
+        <form method="post" enctype="multipart/form-data" style="padding: 1.5rem;">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div style="margin-bottom: 1.25rem;">
+                <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #1e293b;">
+                    {{ field.label }}
+                    {% if field.field.required %}
+                        <span style="color: #dc2626;">*</span>
+                    {% endif %}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                    <p style="font-size: 0.688rem; color: #64748b; margin-top: 0.25rem;">{{ field.help_text }}</p>
+                {% endif %}
+                {% if field.errors %}
+                    <ul style="list-style: none; padding: 0; margin-top: 0.25rem;">
+                        {% for error in field.errors %}
+                            <li style="color: #dc2626; font-size: 0.688rem;">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <!-- Блок для загрузки файлов -->
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+                <h3 style="font-size: 1rem; margin-bottom: 1rem;">📎 Прикреплённые файлы</h3>
+                
+                <div id="file-list">
+                    <div class="file-item" style="margin-bottom: 1rem;">
+                        <input type="file" name="documents" multiple style="width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    </div>
+                </div>
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">Поддерживаемые форматы: PDF, DOC, DOCX, XLS, XLSX, PNG, JPG</p>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn-primary">
+                    {% if form.instance.pk %}Сохранить{% else %}Создать процесс{% endif %}
+                </button>
+                <a href="{% url 'process_list' %}" class="btn">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .btn {
+        display: inline-block;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #475569;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+    .btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        transition: all 0.15s;
+        box-sizing: border-box;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    textarea.form-control {
+        resize: vertical;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'repository/base.html' %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1>{% if form.instance.pk %}Редактирование интеграции{% else %}Новая интеграция{% endif %}</h1>
+        <a href="{% url 'interaction_list' %}" class="btn">← Назад</a>
+    </div>
+    
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.name.label }}</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <p style="color: #dc2626; font-size: 0.75rem;">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.service.label }}</label>
+                {{ form.service }}
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Необязательно. Связь с бизнес-смыслом интеграции.</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.source_component.label }}</label>
+                    {{ form.source_component }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.target_component.label }}</label>
+                    {{ form.target_component }}
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.protocol.label }}</label>
+                    {{ form.protocol }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.method_type.label }}</label>
+                    {{ form.method_type }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.method_detail.label }}</label>
+                    {{ form.method_detail }}
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.endpoint.label }}</label>
+                {{ form.endpoint }}
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.environment.label }}</label>
+                {{ form.environment }}
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.technical_description.label }}</label>
+                {{ form.technical_description }}
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn-primary">Сохранить</button>
+                <a href="{% url 'interaction_list' %}" class="btn">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+    .btn {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #475569;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn:hover {
+        background: #f8fafc;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        box-sizing: border-box;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    textarea.form-control {
+        resize: vertical;
+    }
+    select.form-control {
+        background: white;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

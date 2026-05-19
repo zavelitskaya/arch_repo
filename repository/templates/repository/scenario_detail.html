@@ -1,0 +1,260 @@
+{% extends 'repository/base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h1 style="margin: 0;">{{ scenario.name }}</h1>
+            <p style="color: #64748b; margin-top: 0.25rem;">{{ scenario.description|default:"Без описания" }}</p>
+            <p style="color: #64748b; font-size: 0.813rem; margin-top: 0.25rem;">
+                Бизнес-процесс: <a href="/processes/{{ scenario.business_process.id }}/" style="color: #3b82f6;">{{ scenario.business_process.name }}</a>
+            </p>
+        </div>
+        <a href="{% url 'step_create' scenario.id %}" class="btn-primary">+ Добавить шаг</a>
+    </div>
+    
+    <!-- Вкладки -->
+    <div style="border-bottom: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
+        <div style="display: flex; gap: 1rem;">
+            <button class="tab-btn active" data-tab="list">📋 Список шагов</button>
+            <button class="tab-btn" data-tab="diagram">📊 Диаграмма</button>
+        </div>
+    </div>
+    
+    <!-- Вкладка: Список шагов -->
+    <div id="tab-list" class="tab-content active">
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+            <h3 style="margin-top: 0;">Шаги сценария</h3>
+            
+            {% if steps %}
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    {% for step in steps %}
+                    <div class="step-card {% if step.step_type == 'condition' %}step-condition{% else %}step-ordinary{% endif %}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="font-size: 1rem;">Шаг {{ step.step_order }}: {{ step.get_step_type_display }}</strong>
+                            <a href="{% url 'step_edit' step.id %}" style="color: #64748b; font-size: 0.75rem; text-decoration: none;">✏️</a>
+                        </div>
+                        
+                        {% if step.step_type == 'ordinary' and step.interaction %}
+                            <div style="margin-top: 0.5rem;">
+                                <div style="background: #eff6ff; border-radius: 8px; padding: 0.75rem;">
+                                    <strong>Интеграция:</strong> {{ step.interaction.name }}
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">
+                                        {{ step.interaction.source_component.system.name }} → {{ step.interaction.target_component.system.name }}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">
+                                        {{ step.interaction.protocol|upper }} · {{ step.interaction.get_method_type_display }} · {{ step.interaction.get_environment_display }}
+                                    </div>
+                                    {% if step.interaction.endpoint %}
+                                        <div style="font-size: 0.688rem; color: #94a3b8; margin-top: 0.25rem;">
+                                            {{ step.interaction.endpoint }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if step.step_type == 'condition' %}
+                            <div style="margin-top: 0.5rem;">
+                                <div style="background: #fef3c7; border-radius: 8px; padding: 0.75rem;">
+                                    <strong>Условие:</strong> {{ step.condition_expression }}
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">
+                                        Если ИСТИНА → {% if step.true_next_step %}Шаг {{ step.true_next_step.step_order }}{% else %}конец{% endif %}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">
+                                        Если ЛОЖЬ → {% if step.false_next_step %}Шаг {{ step.false_next_step.step_order }}{% else %}конец{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; color: #64748b;">
+                    Нет шагов. Добавьте первый шаг через кнопку выше.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Вкладка: Диаграмма -->
+    <div id="tab-diagram" class="tab-content" style="display: none;">
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+            <h3 style="margin-top: 0;">Визуальная схема</h3>
+            <div id="diagram" style="width: 100%; height: 500px; background: #f8fafc; border-radius: 8px;"></div>
+            <p style="font-size: 0.75rem; color: #64748b; margin-top: 1rem; text-align: center;">
+                💡 Наведите на узел для деталей. Можно перетаскивать и масштабировать.
+            </p>
+        </div>
+    </div>
+    
+    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+        <a href="/processes/{{ scenario.business_process.id }}/" class="btn">← Назад к процессу</a>
+        <a href="{% url 'scenario_edit' scenario.id %}" class="btn">✏️ Редактировать сценарий</a>
+    </div>
+</div>
+
+<style>
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+    .btn {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #475569;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn:hover {
+        background: #f8fafc;
+    }
+    .step-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1rem;
+    }
+    .step-ordinary {
+        border-left: 4px solid #3b82f6;
+    }
+    .step-condition {
+        border-left: 4px solid #f59e0b;
+    }
+    .tab-btn {
+        background: none;
+        border: none;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #64748b;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.15s;
+    }
+    .tab-btn:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+    .tab-btn.active {
+        background: #eff6ff;
+        color: #3b82f6;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js"></script>
+<script>
+    // Данные из Django
+    const systemsData = JSON.parse('{{ systems_json|escapejs }}');
+    const edgesData = JSON.parse('{{ edges_json|escapejs }}');
+    
+    function renderDiagram() {
+        if (!systemsData || systemsData.length === 0) {
+            document.getElementById('diagram').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b;">Нет данных для отображения</div>';
+            return;
+        }
+        
+        const nodes = [];
+        const edges = [];
+        
+        // Узлы — системы
+        for (let i = 0; i < systemsData.length; i++) {
+            const sys = systemsData[i];
+            nodes.push({
+                id: sys.id,
+                label: sys.name,
+                title: sys.name,
+                color: {
+                    background: '#dbeafe',
+                    border: '#3b82f6'
+                },
+                shape: 'box',
+                font: { size: 14, align: 'center' }
+            });
+        }
+        
+        // Связи — интеграции
+        for (let i = 0; i < edgesData.length; i++) {
+            const edge = edgesData[i];
+            edges.push({
+                from: edge.from,
+                to: edge.to,
+                label: edge.label,
+                title: `Шаг ${edge.step_order}: ${edge.protocol.toUpperCase()}`,
+                arrows: 'to',
+                smooth: { type: 'cubicBezier' },
+                font: { align: 'top', size: 10 }
+            });
+        }
+        
+        const container = document.getElementById('diagram');
+        const data = {
+            nodes: new vis.DataSet(nodes),
+            edges: new vis.DataSet(edges)
+        };
+        const options = {
+            nodes: {
+                margin: 15,
+                widthConstraint: { minimum: 120, maximum: 200 },
+                heightConstraint: { minimum: 60 }
+            },
+            edges: {
+                smooth: { type: 'cubicBezier', roundness: 0.5 }
+            },
+            physics: {
+                enabled: true,
+                stabilization: { iterations: 100 }
+            },
+            layout: {
+                hierarchical: {
+                    enabled: true,
+                    direction: 'LR',
+                    levelSeparation: 200,
+                    nodeSpacing: 150
+                }
+            }
+        };
+        
+        new vis.Network(container, data, options);
+    }
+    
+    // Переключение вкладок
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+    let diagramRendered = false;
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            contents.forEach(content => content.style.display = 'none');
+            document.getElementById(`tab-${tabId}`).style.display = 'block';
+            
+            if (tabId === 'diagram' && !diagramRendered) {
+                setTimeout(renderDiagram, 100);
+                diagramRendered = true;
+            }
+        });
+    });
+</script>
+{% endblock %}

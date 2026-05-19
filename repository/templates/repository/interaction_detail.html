@@ -1,0 +1,208 @@
+{% extends 'repository/base.html' %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    
+    <div style="margin-bottom: 1.5rem;">
+        <a href="{% url 'interaction_list' %}" class="btn">← Назад к интеграциям</a>
+    </div>
+    
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h1 style="margin: 0;">{{ interaction.name }}</h1>
+            <div>
+                <span class="env-badge env-{{ interaction.environment }}">{{ interaction.get_environment_display }}</span>
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <h3>От и до</h3>
+            <div class="direction-flow">
+                <div class="system-box">
+                    <div class="system-name">{{ interaction.source_component.system.name }}</div>
+                    <div class="component-name">{{ interaction.source_component.name }}</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="system-box">
+                    <div class="system-name">{{ interaction.target_component.system.name }}</div>
+                    <div class="component-name">{{ interaction.target_component.name }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <h3>Технические детали</h3>
+            <div class="detail-row">
+                <div class="detail-label">Протокол:</div>
+                <div class="detail-value"><span class="protocol-badge">{{ interaction.protocol|upper }}</span></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Тип метода:</div>
+                <div class="detail-value">{{ interaction.get_method_type_display }}</div>
+            </div>
+            {% if interaction.method_detail %}
+            <div class="detail-row">
+                <div class="detail-label">Метод:</div>
+                <div class="detail-value">{{ interaction.method_detail }}</div>
+            </div>
+            {% endif %}
+            {% if interaction.endpoint %}
+            <div class="detail-row">
+                <div class="detail-label">Endpoint:</div>
+                <div class="detail-value"><code>{{ interaction.endpoint }}</code></div>
+            </div>
+            {% endif %}
+            <div class="detail-row">
+                <div class="detail-label">Среда:</div>
+                <div class="detail-value">{{ interaction.get_environment_display }}</div>
+            </div>
+        </div>
+        
+        {% if interaction.service %}
+        <div class="detail-section">
+            <h3>Бизнес-смысл</h3>
+            <div class="detail-row">
+                <div class="detail-label">Интеграционный сервис:</div>
+                <div class="detail-value">{{ interaction.service.name }}</div>
+            </div>
+            {% if interaction.service.business_purpose %}
+            <div class="detail-row">
+                <div class="detail-label">Назначение:</div>
+                <div class="detail-value">{{ interaction.service.business_purpose }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if interaction.technical_description %}
+        <div class="detail-section">
+            <h3>Описание</h3>
+            <p style="margin: 0; line-height: 1.5;">{{ interaction.technical_description }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="detail-section">
+            <h3>Метаданные</h3>
+            <div class="detail-row">
+                <div class="detail-label">Создана:</div>
+                <div class="detail-value">{{ interaction.created_at|date:"d.m.Y H:i" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Обновлена:</div>
+                <div class="detail-value">{{ interaction.updated_at|date:"d.m.Y H:i" }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 1rem;">
+        <a href="{% url 'interaction_edit' interaction.id %}" class="btn">✏️ Редактировать</a>
+    </div>
+</div>
+
+<style>
+    .btn {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #475569;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn:hover {
+        background: #f8fafc;
+    }
+    .detail-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    .detail-section:first-of-type {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+    .detail-section h3 {
+        font-size: 1rem;
+        margin: 0 0 1rem 0;
+        color: #0f172a;
+    }
+    .detail-row {
+        display: flex;
+        padding: 0.5rem 0;
+    }
+    .detail-label {
+        width: 120px;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #64748b;
+    }
+    .detail-value {
+        flex: 1;
+        font-size: 0.875rem;
+        color: #1e293b;
+    }
+    .detail-value code {
+        background: #f1f5f9;
+        padding: 0.125rem 0.375rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+    .direction-flow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    .system-box {
+        text-align: center;
+        flex: 1;
+    }
+    .system-name {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+    .component-name {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+    .arrow {
+        font-size: 1.5rem;
+        color: #3b82f6;
+    }
+    .env-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.688rem;
+        font-weight: 500;
+    }
+    .env-dev {
+        background: #e2e8f0;
+        color: #475569;
+    }
+    .env-stage {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    .env-prod {
+        background: #dcfce7;
+        color: #15803d;
+    }
+    .protocol-badge {
+        display: inline-block;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.125rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.688rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}

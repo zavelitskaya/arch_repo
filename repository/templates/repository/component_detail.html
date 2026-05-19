@@ -1,0 +1,46 @@
+{% extends 'repository/base.html' %}
+
+{% block content %}
+<div class="detail-card">
+    <h2>{{ component.name }}</h2>
+    <div class="detail-row"><div class="detail-label">Тип:</div><div class="detail-value">{{ component.component_type }}</div></div>
+    <div class="detail-row"><div class="detail-label">Система:</div><div class="detail-value">{{ component.system.name }}</div></div>
+    <div class="detail-row"><div class="detail-label">Владелец:</div><div class="detail-value">{{ component.technical_owner|default:"—" }}</div></div>
+    <div class="detail-row"><div class="detail-label">Описание:</div><div class="detail-value">{{ component.description|default:"—" }}</div></div>
+</div>
+
+<div class="detail-card">
+    <h3>🗄️ Инфраструктура</h3>
+    {% for link in component.infra_links.all %}
+    <div class="dependency-tree">
+        {{ link.infrastructure_object.name }} ({{ link.infrastructure_object.technology }}) — роль: <strong>{{ link.role|default:"стандартная" }}</strong>
+    </div>
+    {% empty %}
+    <p>Нет привязанной инфраструктуры</p>
+    {% endfor %}
+</div>
+
+<div class="detail-card">
+    <h3>🔗 Интеграции</h3>
+    <h4>Исходящие (компонент вызывает):</h4>
+    {% for interaction in component.source_interactions.all %}
+    <div class="dependency-tree">
+        → {{ interaction.target_component.name }} ({{ interaction.protocol }}, {{ interaction.environment }})
+        <br><small>{{ interaction.endpoint|default:"—" }}</small>
+    </div>
+    {% empty %}
+    <p>Нет исходящих связей</p>
+    {% endfor %}
+    
+    <h4 style="margin-top:1rem;">Входящие (вызывают компонент):</h4>
+    {% for interaction in component.target_interactions.all %}
+    <div class="dependency-tree">
+        ← {{ interaction.source_component.name }} ({{ interaction.protocol }})
+    </div>
+    {% empty %}
+    <p>Нет входящих связей</p>
+    {% endfor %}
+</div>
+
+<a href="/components/" class="btn">← Назад</a>
+{% endblock %}

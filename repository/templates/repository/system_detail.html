@@ -1,0 +1,201 @@
+{% extends 'repository/base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="display: flex; gap: 24px; max-width: 1400px; margin: 0 auto;">
+    
+    <!-- БОКОВОЕ МЕНЮ -->
+    <div style="width: 240px; flex-shrink: 0;">
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px;">
+            <div style="padding: 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                <strong>{{ system.name }}</strong>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                {% if active_tab == 'overview' %}
+                    <a href="?tab=overview" style="display: block; padding: 10px 16px; color: #3b82f6; background: #eff6ff; text-decoration: none;">📊 Обзор</a>
+                {% else %}
+                    <a href="?tab=overview" style="display: block; padding: 10px 16px; color: #475569; text-decoration: none;">📊 Обзор</a>
+                {% endif %}
+                
+                {% if active_tab == 'components' %}
+                    <a href="?tab=components" style="display: flex; justify-content: space-between; padding: 10px 16px; color: #3b82f6; background: #eff6ff; text-decoration: none;">
+                        <span>🖥️ Компоненты</span>
+                        <span style="background: #bfdbfe; padding: 0 8px; border-radius: 12px;">{{ components|length }}</span>
+                    </a>
+                {% else %}
+                    <a href="?tab=components" style="display: flex; justify-content: space-between; padding: 10px 16px; color: #475569; text-decoration: none;">
+                        <span>🖥️ Компоненты</span>
+                        <span style="background: #e2e8f0; padding: 0 8px; border-radius: 12px;">{{ components|length }}</span>
+                    </a>
+                {% endif %}
+                
+                {% if active_tab == 'infrastructure' %}
+                    <a href="?tab=infrastructure" style="display: flex; justify-content: space-between; padding: 10px 16px; color: #3b82f6; background: #eff6ff; text-decoration: none;">
+                        <span>🗄️ Инфраструктура</span>
+                        <span style="background: #bfdbfe; padding: 0 8px; border-radius: 12px;">{{ infra_objects|length }}</span>
+                    </a>
+                {% else %}
+                    <a href="?tab=infrastructure" style="display: flex; justify-content: space-between; padding: 10px 16px; color: #475569; text-decoration: none;">
+                        <span>🗄️ Инфраструктура</span>
+                        <span style="background: #e2e8f0; padding: 0 8px; border-radius: 12px;">{{ infra_objects|length }}</span>
+                    </a>
+                {% endif %}
+                
+                {% if active_tab == 'interactions' %}
+                    <a href="?tab=interactions" style="display: flex; justify-content: space-between; padding: 10px 16px; color: #3b82f6; background: #eff6ff; text-decoration: none;">
+                        <span>🔗 Интеграции</span>
+                        <span style="background: #bfdbfe; padding: 0 8px; border-radius: 12px;">{{ interactions|length }}</span>
+                    </a>
+                {% else %}
+                    <a href="?tab=interactions" style="display: flex; justify-content: space-between; padding: 10px 16px; color: #475569; text-decoration: none;">
+                        <span>🔗 Интеграции</span>
+                        <span style="background: #e2e8f0; padding: 0 8px; border-radius: 12px;">{{ interactions|length }}</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <div style="flex: 1;">
+        
+        <!-- КАРТОЧКА СИСТЕМЫ -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="margin: 0;">{{ system.name }}</h2>
+                <div>
+                    <span style="background: #fef2f2; color: #dc2626; padding: 4px 12px; border-radius: 20px; font-size: 12px;">{{ system.get_criticality_display }}</span>
+                    <span style="background: #eff6ff; color: #3b82f6; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-left: 8px;">{{ system.get_lifecycle_stage_display }}</span>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 8px;">
+                <span style="width: 140px; display: inline-block; color: #64748b;">Описание:</span>
+                <span>{{ system.description|default:"—" }}</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <span style="width: 140px; display: inline-block; color: #64748b;">Команда-владелец:</span>
+                <span>{{ system.owner_team.name|default:"—" }}</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <span style="width: 140px; display: inline-block; color: #64748b;">Требуемый SLA:</span>
+                <span>{{ system.sla_required|default:"—" }}</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <span style="width: 140px; display: inline-block; color: #64748b;">Документация:</span>
+                <span>{% if system.documentation_url %}<a href="{{ system.documentation_url }}" target="_blank">Ссылка</a>{% else %}—{% endif %}</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <span style="width: 140px; display: inline-block; color: #64748b;">Репозиторий:</span>
+                <span>{% if system.repository_url %}<a href="{{ system.repository_url }}" target="_blank">Ссылка</a>{% else %}—{% endif %}</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <span style="width: 140px; display: inline-block; color: #64748b;">Комплаенс:</span>
+                <span>{{ system.compliance_requirements|default:"—" }}</span>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <span style="width: 140px; display: inline-block; color: #64748b;">Теги:</span>
+                <span>
+                    {% for tag in system.tags.all %}
+                        {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}—{% endfor %}
+                </span>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <span style="width: 140px; display: inline-block; color: #64748b;">Создана:</span>
+                <span>{{ system.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+        </div>
+
+        <!-- КОНТЕНТ ВЫБРАННОГО РАЗДЕЛА -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+            
+            {% if active_tab == 'overview' %}
+                <h3 style="margin-top: 0;">Статистика системы</h3>
+                <div style="display: flex; gap: 16px;">
+                    <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #3b82f6;">{{ components|length }}</div>
+                        <div style="color: #64748b;">Компоненты</div>
+                    </div>
+                    <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #3b82f6;">{{ infra_objects|length }}</div>
+                        <div style="color: #64748b;">Инфраструктура</div>
+                    </div>
+                    <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #3b82f6;">{{ interactions|length }}</div>
+                        <div style="color: #64748b;">Интеграции</div>
+                    </div>
+                </div>
+
+            {% elif active_tab == 'components' %}
+                <h3 style="margin-top: 0;">Компоненты системы</h3>
+                {% if components %}
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        {% for component in components %}
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong>{{ component.name }}</strong>
+                                <span style="background: #f1f5f9; padding: 2px 8px; border-radius: 12px; font-size: 11px;">{{ component.get_component_type_display }}</span>
+                            </div>
+                            <p style="margin: 8px 0 4px; color: #475569;">{{ component.description|default:"Нет описания" }}</p>
+                            <p style="margin: 0; font-size: 12px; color: #64748b;">Владелец: {{ component.technical_owner|default:"—" }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>Нет компонентов в этой системе</p>
+                {% endif %}
+
+            {% elif active_tab == 'infrastructure' %}
+                <h3 style="margin-top: 0;">Инфраструктурные объекты</h3>
+                {% if infra_objects %}
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        {% for obj in infra_objects %}
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong>{{ obj.name }}</strong>
+                                <span style="background: #f1f5f9; padding: 2px 8px; border-radius: 12px; font-size: 11px;">{{ obj.get_object_type_display }}</span>
+                            </div>
+                            <p style="margin: 8px 0 0;">Технология: {{ obj.technology }}</p>
+                            {% if obj.version %}
+                                <p style="margin: 4px 0 0; font-size: 12px;">Версия: {{ obj.version }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>Нет инфраструктурных объектов</p>
+                {% endif %}
+
+            {% elif active_tab == 'interactions' %}
+                <h3 style="margin-top: 0;">Интеграции</h3>
+                {% if interactions %}
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        {% for interaction in interactions %}
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                            <strong>{{ interaction.name }}</strong>
+                            <p style="margin: 8px 0 4px;">
+                                {{ interaction.source_component.name }} → {{ interaction.target_component.name }}
+                            </p>
+                            <p style="margin: 0; font-size: 12px; color: #64748b;">
+                                {{ interaction.protocol|upper }} · {{ interaction.get_method_type_display }} · {{ interaction.get_environment_display }}
+                            </p>
+                            {% if interaction.endpoint %}
+                                <p style="margin: 8px 0 0; font-size: 11px; color: #94a3b8;">{{ interaction.endpoint }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>Нет интеграций</p>
+                {% endif %}
+            {% endif %}
+            
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <a href="/systems/" style="display: inline-block; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 16px; text-decoration: none; color: #475569;">← Назад к системам</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

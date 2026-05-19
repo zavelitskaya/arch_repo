@@ -1,0 +1,53 @@
+<div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+    <h3 style="margin-top: 0;">Шаги сценария</h3>
+    
+    {% if steps %}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for step in steps %}
+            <div class="step-card {% if step.step_type == 'condition' %}step-condition{% else %}step-ordinary{% endif %}">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="font-size: 1rem;">Шаг {{ step.step_order }}: {{ step.get_step_type_display }}</strong>
+                    <a href="/admin/repository/scenariostep/{{ step.id }}/change/" style="color: #64748b; font-size: 0.75rem;">✏️</a>
+                </div>
+                
+                {% if step.step_type == 'ordinary' and step.interaction %}
+                    <div style="margin-top: 0.5rem;">
+                        <div style="background: #eff6ff; border-radius: 8px; padding: 0.75rem;">
+                            <strong>Интеграция:</strong> {{ step.interaction.name }}
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">
+                                {{ step.interaction.source_component.name }} → {{ step.interaction.target_component.name }}
+                            </div>
+                            <div style="font-size: 0.75rem; color: #64748b;">
+                                {{ step.interaction.protocol|upper }} · {{ step.interaction.get_method_type_display }} · {{ step.interaction.get_environment_display }}
+                            </div>
+                            {% if step.interaction.endpoint %}
+                                <div style="font-size: 0.688rem; color: #94a3b8; margin-top: 0.25rem;">
+                                    {{ step.interaction.endpoint }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if step.step_type == 'condition' %}
+                    <div style="margin-top: 0.5rem;">
+                        <div style="background: #fef3c7; border-radius: 8px; padding: 0.75rem;">
+                            <strong>Условие:</strong> {{ step.condition_expression }}
+                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">
+                                Если ИСТИНА → {% if step.true_next_step %}Шаг {{ step.true_next_step.step_order }}{% else %}конец{% endif %}
+                            </div>
+                            <div style="font-size: 0.75rem; color: #64748b;">
+                                Если ЛОЖЬ → {% if step.false_next_step %}Шаг {{ step.false_next_step.step_order }}{% else %}конец{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 2rem; color: #64748b;">
+            Нет шагов. Добавьте первый шаг через админку.
+        </div>
+    {% endif %}
+</div>

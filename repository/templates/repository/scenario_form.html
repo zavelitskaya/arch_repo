@@ -1,0 +1,95 @@
+{% extends 'repository/base.html' %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1>Редактирование сценария</h1>
+        <a href="{% url 'scenario_detail' scenario.id %}" class="btn">← Назад</a>
+    </div>
+    
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.name.label }}</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <p style="color: #dc2626; font-size: 0.75rem;">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ form.description.label }}</label>
+                {{ form.description }}
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Краткое описание сценария: что происходит, при каких условиях.</p>
+            </div>
+            
+            <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                {{ form.is_default }}
+                <label style="margin-bottom: 0; font-weight: 500;">{{ form.is_default.label }}</label>
+                <p style="font-size: 0.75rem; color: #64748b; margin: 0 0 0 1rem;">Отметьте, если это сценарий по умолчанию для данного бизнес-процесса</p>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn-primary">Сохранить</button>
+                <a href="{% url 'scenario_detail' scenario.id %}" class="btn">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+    .btn {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        font-weight: 500;
+        color: #475569;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn:hover {
+        background: #f8fafc;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        box-sizing: border-box;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    textarea.form-control {
+        resize: vertical;
+    }
+    .checkbox-control {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
