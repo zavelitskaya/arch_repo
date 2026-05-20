@@ -77,40 +77,25 @@ class ScenarioForm(forms.ModelForm):
 class ScenarioStepForm(forms.ModelForm):
     class Meta:
         model = ScenarioStep
-        fields = ['step_order', 'step_type', 'flow', 'condition_expression', 'true_next_step', 'false_next_step']
+        fields = ['step_order', 'flow', 'description']
         widgets = {
             'step_order': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            'step_type': forms.Select(attrs={'class': 'form-control', 'id': 'step-type'}),
-            'flow': forms.Select(attrs={'class': 'form-control', 'id': 'flow-field'}),
-            'condition_expression': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'например: сумма > 10000'}),
-            'true_next_step': forms.Select(attrs={'class': 'form-control', 'id': 'true-next-field'}),
-            'false_next_step': forms.Select(attrs={'class': 'form-control', 'id': 'false-next-field'}),
+            'flow': forms.Select(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Описание шага...'}),
         }
         labels = {
             'step_order': 'Порядковый номер',
-            'step_type': 'Тип шага',
             'flow': 'Интеграционный поток',
-            'condition_expression': 'Условие',
-            'true_next_step': 'Переход при ИСТИНА',
-            'false_next_step': 'Переход при ЛОЖЬ',
+            'description': 'Описание шага',
         }
     
     def __init__(self, *args, **kwargs):
         self.scenario = kwargs.pop('scenario', None)
         super().__init__(*args, **kwargs)
+        self.fields['flow'].queryset = IntegrationFlow.objects.all()
+        self.fields['flow'].required = False
+
         
-        if self.scenario:
-            existing_steps = self.scenario.steps.all()
-            self.fields['true_next_step'].queryset = existing_steps
-            self.fields['false_next_step'].queryset = existing_steps
-            self.fields['true_next_step'].required = False
-            self.fields['false_next_step'].required = False
-            
-            # Все доступные потоки
-            self.fields['flow'].queryset = IntegrationFlow.objects.all()
-            self.fields['flow'].required = False
-
-
 class IntegrationServiceForm(forms.ModelForm):
     class Meta:
         model = IntegrationService

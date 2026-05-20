@@ -40,9 +40,9 @@ class ScenarioAdmin(admin.ModelAdmin):
 
 @admin.register(ScenarioStep)
 class ScenarioStepAdmin(admin.ModelAdmin):
-    list_display = ('scenario', 'step_order', 'step_type', 'flow')
-    list_filter = ('step_type', 'scenario__business_process')
-    search_fields = ('condition_expression',)
+    list_display = ('scenario', 'step_order', 'flow')
+    list_filter = ('scenario',)
+    search_fields = ('description',)
 
 
 @admin.register(IntegrationService)

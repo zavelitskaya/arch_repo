@@ -15,38 +15,19 @@
             <div style="margin-bottom: 1rem;">
                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Порядковый номер</label>
                 {{ form.step_order }}
-                {% if form.step_order.errors %}
-                    <p style="color: #dc2626; font-size: 0.75rem;">{{ form.step_order.errors.0 }}</p>
-                {% endif %}
+                <p style="font-size: 0.75rem; color: #64748b;">Определяет последовательность шагов в сценарии</p>
             </div>
             
             <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Тип шага</label>
-                {{ form.step_type }}
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Интеграционный поток</label>
+                {{ form.flow }}
+                <p style="font-size: 0.75rem; color: #64748b;">Выберите интеграцию между системами</p>
             </div>
             
-            <div id="ordinary-fields" style="display: none;">
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Интеграционное взаимодействие</label>
-                    {{ form.interaction }}
-                    <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Выберите интеграцию между системами</p>
-                </div>
-            </div>
-            
-            <div id="condition-fields" style="display: none;">
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Условие</label>
-                    {{ form.condition_expression }}
-                    <p style="font-size: 0.75rem; color: #64748b;">Пример: status == 'success' или sum > 10000</p>
-                </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Переход при ИСТИНА</label>
-                    {{ form.true_next_step }}
-                </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Переход при ЛОЖЬ</label>
-                    {{ form.false_next_step }}
-                </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Описание шага</label>
+                {{ form.description }}
+                <p style="font-size: 0.75rem; color: #64748b;">Что происходит на этом шаге? Зачем он нужен в бизнес-процессе?</p>
             </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
@@ -55,18 +36,6 @@
             </div>
         </form>
     </div>
-    
-    {% if existing_steps %}
-    <div style="margin-top: 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem;">
-        <h3 style="margin: 0 0 0.5rem 0; font-size: 0.875rem;">Существующие шаги:</h3>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            {% for step in existing_steps %}
-            <span class="step-badge">Шаг {{ step.step_order }}: {{ step.get_step_type_display }}</span>
-            {% endfor %}
-        </div>
-        <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">💡 Для ветвлений вы можете ссылаться на уже созданные шаги</p>
-    </div>
-    {% endif %}
 </div>
 
 <style>
@@ -82,9 +51,6 @@
         text-decoration: none;
         display: inline-block;
     }
-    .btn-primary:hover {
-        background: #2563eb;
-    }
     .btn {
         background: white;
         border: 1px solid #e2e8f0;
@@ -96,9 +62,6 @@
         text-decoration: none;
         display: inline-block;
     }
-    .btn:hover {
-        background: #f8fafc;
-    }
     .form-control {
         width: 100%;
         padding: 0.5rem 0.75rem;
@@ -107,37 +70,12 @@
         font-size: 0.875rem;
         box-sizing: border-box;
     }
+    textarea.form-control {
+        resize: vertical;
+    }
     .form-control:focus {
         outline: none;
         border-color: #3b82f6;
     }
-    .step-badge {
-        background: #e2e8f0;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-    }
 </style>
-
-<script>
-    const stepTypeSelect = document.getElementById('id_step_type');
-    const ordinaryDiv = document.getElementById('ordinary-fields');
-    const conditionDiv = document.getElementById('condition-fields');
-    
-    function toggleFields() {
-        if (stepTypeSelect.value === 'ordinary') {
-            ordinaryDiv.style.display = 'block';
-            conditionDiv.style.display = 'none';
-        } else if (stepTypeSelect.value === 'condition') {
-            ordinaryDiv.style.display = 'none';
-            conditionDiv.style.display = 'block';
-        } else {
-            ordinaryDiv.style.display = 'none';
-            conditionDiv.style.display = 'none';
-        }
-    }
-    
-    stepTypeSelect.addEventListener('change', toggleFields);
-    toggleFields();
-</script>
 {% endblock %}

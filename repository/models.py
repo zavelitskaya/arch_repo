@@ -81,47 +81,19 @@ class Scenario(models.Model):
 
 
 class ScenarioStep(models.Model):
-    """Шаг сценария (с поддержкой ветвлений)"""
-    STEP_TYPES = [
-        ('ordinary', 'Обычный шаг'),
-        ('condition', 'Ветвление'),
-    ]
-
     scenario = models.ForeignKey(Scenario, on_delete=models.CASCADE, related_name='steps')
     step_order = models.PositiveIntegerField(verbose_name="Порядок шага")
-    step_type = models.CharField(max_length=20, choices=STEP_TYPES, default='ordinary')
-    
-    condition_expression = models.TextField(blank=True, verbose_name="Условие")
-    true_next_step = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, 
-                                       related_name='true_branch')
-    false_next_step = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True,
-                                        related_name='false_branch')
-    flow = models.ForeignKey('IntegrationFlow', on_delete=models.SET_NULL, 
-                             null=True, blank=True, related_name='steps', verbose_name="Интеграционный поток")
-
-    def clean(self):
-        if self.step_type == 'condition':
-            if not self.condition_expression:
-                raise ValidationError({'condition_expression': 'Для ветвления нужно указать условие'})
-            if not self.true_next_step or not self.false_next_step:
-                raise ValidationError('Для ветвления нужно указать оба перехода')
-            for next_step in [self.true_next_step, self.false_next_step]:
-                if next_step and next_step.scenario != self.scenario:
-                    raise ValidationError('Переходы должны быть в рамках того же сценария')
-        else:
-            if not self.flow:
-                raise ValidationError({'flow': 'Для обычного шага нужно указать интеграционный поток'})
+    flow = models.ForeignKey('IntegrationFlow', on_delete=models.SET_NULL, null=True, blank=True, related_name='steps', verbose_name="Интеграционный поток")
+    description = models.TextField(blank=True, verbose_name="Описание шага")
 
     def __str__(self):
-        return f"Шаг {self.step_order}: {self.get_step_type_display()}"
+        return f"Шаг {self.step_order}: {self.flow.service.name if self.flow else '—'}"
 
     class Meta:
         verbose_name = "Шаг сценария"
         verbose_name_plural = "Шаги сценария"
         ordering = ['scenario', 'step_order']
         unique_together = ['scenario', 'step_order']
-
-
 # ==================== УРОВЕНЬ 2: ИНТЕГРАЦИОННЫЕ СЕРВИСЫ И ПОТОКИ ====================
 
 class IntegrationService(models.Model):

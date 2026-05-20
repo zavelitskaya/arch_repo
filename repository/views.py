@@ -142,6 +142,8 @@ class SystemDetailView(DetailView):
         return context
 
 
+import json
+
 @method_decorator(login_required, name='dispatch')
 class ScenarioDetailView(DetailView):
     model = Scenario
@@ -157,7 +159,7 @@ class ScenarioDetailView(DetailView):
         edges = []
         
         for step in steps:
-            if step.step_type == 'ordinary' and step.flow:
+            if step.flow:
                 source_system = step.flow.source_system
                 target_system = step.flow.target_system
                 
@@ -177,8 +179,8 @@ class ScenarioDetailView(DetailView):
         context['steps'] = steps
         context['systems_json'] = json.dumps(list(systems.values()), ensure_ascii=False)
         context['edges_json'] = json.dumps(edges, ensure_ascii=False)
+        
         return context
-
 
 @method_decorator(login_required, name='dispatch')
 class ScenarioUpdateView(UpdateView):
